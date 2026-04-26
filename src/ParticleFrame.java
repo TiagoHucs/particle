@@ -5,21 +5,19 @@ import java.util.List;
 public class ParticleFrame extends JFrame {
 
     private final List<Particle> particles;
-    private final double[][] rules;
+
     private final int width;
     private final int height;
 
-    // Distâncias importantes
-    private final double minDist = 8;   // distância mínima (evita toque)
-    private final double maxDist = 80;  // alcance da interação
+    private final double minDist = 8;
+    private final double maxDist = 80;
 
-    public ParticleFrame(int width, int height, List<Particle> particles, double[][] rules) {
+    public ParticleFrame(int width, int height, List<Particle> particles) {
         this.width = width;
         this.height = height;
         this.particles = particles;
-        this.rules = rules;
 
-        setTitle("Particle Life - Java");
+        setTitle("Particle Life - DNA Class");
         setSize(width, height);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -57,16 +55,17 @@ public class ParticleFrame extends JFrame {
                 double nx = dx / dist;
                 double ny = dy / dist;
 
-                // 1. REPULSÃO FORTE (evita encostar)
+                // evita toque
                 if (dist < minDist) {
                     double force = (minDist - dist) * 0.5;
                     fx -= force * nx;
                     fy -= force * ny;
                 }
 
-                // 2. INTERAÇÃO NORMAL (atração/repulsão por tipo)
+                // interação via DNA
                 else if (dist < maxDist) {
-                    double rule = rules[a.type][b.type];
+
+                    double rule = a.dna.getInteraction(b.dna.getColor());
 
                     double force = rule * (1 - dist / maxDist);
 
@@ -75,12 +74,10 @@ public class ParticleFrame extends JFrame {
                 }
             }
 
-            // aplica força acumulada
             a.vx += fx * 0.05;
             a.vy += fy * 0.05;
         }
 
-        // Atualiza posição e trata bordas
         for (Particle p : particles) {
             p.update();
 
@@ -99,24 +96,10 @@ public class ParticleFrame extends JFrame {
             g.setColor(Color.BLACK);
             g.fillRect(0, 0, getWidth(), getHeight());
 
-            // desenha partículas
             for (Particle p : particles) {
-                g.setColor(getColor(p.type));
+                g.setColor(p.dna.getColor());
                 g.fillOval((int) p.x, (int) p.y, 4, 4);
             }
-        }
-
-        private Color getColor(int type) {
-            Color[] colors = {
-                    Color.RED,
-                    Color.GREEN,
-                    Color.BLUE,
-                    Color.YELLOW,
-                    Color.CYAN,
-                    Color.MAGENTA
-            };
-
-            return colors[type % colors.length];
         }
     }
 }
